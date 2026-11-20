@@ -1,4 +1,4 @@
-# Smart Space backend
+# Smart Space
 
 Modular monolith: FastAPI, SQLAlchemy 2 (async), PostgreSQL.
 
