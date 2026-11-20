@@ -12,3 +12,4 @@ packaging
 torch
 transformers
 accelerate
+PySide6
