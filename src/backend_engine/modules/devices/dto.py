@@ -22,6 +22,7 @@ class DeviceType(StrEnum):
     SMART_SPEAKER = "smart_speaker"
     CUSTOM = "custom"
 
+
 class Availability(StrEnum):
     ONLINE = "online"
     OFFLINE = "offline"
@@ -39,7 +40,9 @@ class CreateDeviceDto(BaseModel):
 
 
 class DeviceDto(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    """Module boundary. ORM entities never leave the devices module."""
+
+    model_config = ConfigDict(from_attributes=True, frozen=True)
 
     id: UUID
     slug: str

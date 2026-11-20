@@ -2,7 +2,7 @@ import asyncio
 import logging
 from collections import defaultdict
 from collections.abc import Awaitable, Callable
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from .base import Event
 
@@ -10,10 +10,11 @@ log = logging.getLogger(__name__)
 
 E = TypeVar("E", bound=Event)
 Handler = Callable[[E], Awaitable[None]]
+AnyHandler = Callable[[Any], Awaitable[None]]
 
 
 class _Subscription:
-    def __init__(self, handler: Handler, maxsize: int, lossy: bool) -> None:
+    def __init__(self, handler: AnyHandler, maxsize: int, lossy: bool) -> None:
         self.handler = handler
         self.lossy = lossy
         self.queue: asyncio.Queue[Event] = asyncio.Queue(maxsize)
@@ -34,7 +35,7 @@ class EventBus:
         maxsize: int = 1000,
         lossy: bool = False,
     ) -> None:
-        sub = _Subscription(handler, maxsize, lossy)  # type: ignore[arg-type]
+        sub = _Subscription(handler, maxsize, lossy)
         self._subs[event_type].append(sub)
         if self._running:
             sub.task = asyncio.create_task(self._worker(sub))
