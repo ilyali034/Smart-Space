@@ -279,3 +279,4 @@ __marimo__/
 ml_lab.db*
 artifacts/
 results/
+.import_linter_cache/
