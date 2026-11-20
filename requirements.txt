@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic
+sqlalchemy
+aiosqlite
+numpy
+pandas
+scikit-learn
+joblib
+psutil
+packaging
+torch
+transformers
+accelerate
