@@ -6,6 +6,9 @@ from fastapi import FastAPI
 
 from backend_engine.api.errors import register_error_handlers
 from backend_engine.api.v1 import router as v1_router
+from backend_engine.modules.commands.dispatcher import FakeDispatcher
+from backend_engine.modules.commands.service import CommandService
+from backend_engine.modules.commands.uow import CommandsUnitOfWork
 from backend_engine.modules.devices.service import DeviceService
 from backend_engine.modules.devices.uow import DevicesUnitOfWork
 from backend_engine.shared.auth.tokens import TokenVerifier
@@ -32,6 +35,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.token_verifier = TokenVerifier(session_factory)
         app.state.device_service = DeviceService(
             lambda: DevicesUnitOfWork(session_factory, bus)
+        )
+        app.state.command_dispatcher = FakeDispatcher()
+        app.state.command_service = CommandService(
+            lambda: CommandsUnitOfWork(session_factory, bus),
+            app.state.command_dispatcher,
         )
 
         await bus.start()

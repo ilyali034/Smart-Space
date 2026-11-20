@@ -14,11 +14,14 @@ class Permission(StrEnum):
     DEVICE_WRITE = "device:write"
     DEVICE_DELETE = "device:delete"
     DEVICE_REPORT = "device:report"  # state/availability from gateway
-
+    COMMAND_CREATE = "command:create"
+    COMMAND_READ = "command:read"
+    COMMAND_CONFIRM = "command:confirm"
+    SYSTEM_EMERGENCY = "system:emergency"
 
 _ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
     Role.ADMIN: frozenset(Permission),
-    Role.USER: frozenset({Permission.DEVICE_READ, Permission.DEVICE_WRITE}),
+    Role.USER: frozenset({Permission.DEVICE_READ, Permission.DEVICE_WRITE, Permission.COMMAND_CREATE, Permission.COMMAND_READ, Permission.COMMAND_CONFIRM}),
     Role.VIEWER: frozenset({Permission.DEVICE_READ}),
     Role.GATEWAY: frozenset({Permission.DEVICE_READ, Permission.DEVICE_REPORT}),
 }

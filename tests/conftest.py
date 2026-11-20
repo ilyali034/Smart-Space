@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from backend_engine.modules.audit.entity import AuditLogEntity  # noqa: F401
 from backend_engine.modules.devices.entity import DeviceEntity  # noqa: F401
+from backend_engine.modules.commands.entity import CommandEntity, SystemStateEntity  # noqa: F401
 from backend_engine.modules.devices.service import DeviceService
 from backend_engine.modules.devices.uow import DevicesUnitOfWork
 from backend_engine.shared.auth.principal import Principal, Role
@@ -41,7 +42,7 @@ async def engine(settings: Settings) -> AsyncIterator[AsyncEngine]:
         await conn.run_sync(Base.metadata.create_all)
     yield eng
     async with eng.begin() as conn:
-        await conn.execute(text("TRUNCATE device, audit_log, api_token"))
+        await conn.execute(text("TRUNCATE command, system_state, device, audit_log, api_token"))
     await eng.dispose()
 
 

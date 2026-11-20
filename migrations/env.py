@@ -5,6 +5,7 @@ from sqlalchemy.engine import Connection
 
 from backend_engine.modules.audit.entity import AuditLogEntity  # noqa: F401
 from backend_engine.modules.devices.entity import DeviceEntity  # noqa: F401
+from backend_engine.modules.commands.entity import CommandEntity, SystemStateEntity  # noqa: F401
 from backend_engine.shared.auth.tokens import ApiTokenEntity  # noqa: F401
 from backend_engine.shared.config import Settings
 from backend_engine.shared.storage.database import Base, create_engine

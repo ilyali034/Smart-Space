@@ -3,6 +3,11 @@ from collections.abc import Awaitable, Callable
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from backend_engine.modules.commands.exceptions import (
+    CommandConflict,
+    CommandNotFound,
+    HumanConfirmationRequired,
+)
 from backend_engine.modules.devices.exceptions import (
     DeviceAlreadyExists,
     DeviceDisabled,
@@ -16,6 +21,9 @@ _STATUS: dict[type[Exception], int] = {
     DeviceDisabled: 409,
     Forbidden: 403,
     Unauthenticated: 401,
+    CommandConflict: 409,
+    CommandNotFound: 404,
+    HumanConfirmationRequired: 403,
 }
 
 
