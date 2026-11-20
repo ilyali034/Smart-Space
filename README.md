@@ -28,7 +28,7 @@ uvicorn backend_engine.app:create_app --factory
 ```
 Docs: http://localhost:8000/docs  (Authorization: Bearer <token>)
 
-## Test (real PostgreSQL required, DB tests skip without it)
+## Test (real PostgreSQL required)
 ```
 export TEST_DATABASE_URL=postgresql+asyncpg://smartspace:<pwd>@localhost:5432/smartspace_test
 pytest
