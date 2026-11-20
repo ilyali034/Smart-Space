@@ -19,9 +19,11 @@ Events are published only after commit.
 ## Run
 ```
 cp .env.example .env            # set real passwords
-docker compose up -d postgres
+docker compose up -d postgres mqtt
 pip install -e ".[dev]"
 export DATABASE_URL=postgresql+asyncpg://smartspace:<pwd>@localhost:5432/smartspace
+export MQTT_HOST=localhost
+export MQTT_PORT=1883
 alembic upgrade head
 python scripts/create_token.py --name admin --role admin
 uvicorn backend_engine.app:create_app --factory
@@ -39,4 +41,4 @@ mypy src
 ## Known gaps
 - No `room` module: `device.room_id` is a plain UUID, no FK yet.
 - Token lookup hits the DB on every request (add short TTL cache if needed).
-- Gateway (MQTT), context, safety, automation, rate limiting: not implemented.
+- The backend publishes approved commands over MQTT. The local Compose broker is anonymous and its host port is bound to loopback for development; configure authentication and TLS for production. The device gateway/agent that subscribes to those topics and reports device acknowledgements is not included; see [docs/mqtt-gateway.md](docs/mqtt-gateway.md).

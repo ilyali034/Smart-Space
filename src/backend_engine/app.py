@@ -6,7 +6,7 @@ from fastapi import FastAPI
 
 from backend_engine.api.errors import register_error_handlers
 from backend_engine.api.v1 import router as v1_router
-from backend_engine.modules.commands.dispatcher import FakeDispatcher
+from backend_engine.modules.commands.dispatcher import MqttCommandDispatcher
 from backend_engine.modules.commands.service import CommandService
 from backend_engine.modules.commands.uow import CommandsUnitOfWork
 from backend_engine.modules.devices.service import DeviceService
@@ -36,7 +36,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.device_service = DeviceService(
             lambda: DevicesUnitOfWork(session_factory, bus)
         )
-        app.state.command_dispatcher = FakeDispatcher()
+        app.state.command_dispatcher = MqttCommandDispatcher(
+            hostname=cfg.mqtt_host,
+            port=cfg.mqtt_port,
+            username=cfg.mqtt_username,
+            password=cfg.mqtt_password,
+            topic_prefix=cfg.mqtt_topic_prefix,
+            tls=cfg.mqtt_tls,
+            keepalive=cfg.mqtt_keepalive,
+        )
         app.state.command_service = CommandService(
             lambda: CommandsUnitOfWork(session_factory, bus),
             app.state.command_dispatcher,

@@ -11,5 +11,15 @@ services:
       retries: 10
     restart: unless-stopped
 
+  mqtt:
+    image: eclipse-mosquitto:2
+    volumes:
+      - ./deploy/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mqttdata:/mosquitto/data
+    ports:
+      - "127.0.0.1:1883:1883"
+    restart: unless-stopped
+
 volumes:
   pgdata:
+  mqttdata:

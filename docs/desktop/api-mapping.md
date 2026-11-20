@@ -14,7 +14,7 @@ Everything below is confirmed by the code; no assumptions were added. Missing ca
 | “Who am I” endpoint (`/me`) | **Missing** — the client does not know the role and must rely on 403 responses |
 | WebSocket / SSE | **Missing** — there is only an internal in-process `EventBus` |
 | Error format | `{"detail": "<string>"}`; FastAPI validation errors (422) use an array for `detail` |
-| Dispatcher in `app.py` | `FakeDispatcher` — commands **do not reach real devices** (MQTT gateway is not connected) |
+| Dispatcher in `app.py` | `MqttCommandDispatcher` publishes approved commands to MQTT; a device gateway must subscribe and report acknowledgements |
 
 ### Role Permissions
 
@@ -96,7 +96,7 @@ Execution is considered successful **only** when the status is `acknowledged`.
 4. **Reject** does not check expiry or require `awaiting_confirmation` in the service; transition-table protection is the only guard.
 5. **Submitting an unknown slug** does not return 404: it creates a `rejected` command with `decision_reasons=["device_not_found"]` and the zero UUID. Display this as a safety rejection.
 6. **No scheduler is found in `app.py`**: `expire_confirmations()`, `timeout_dispatched()`, and `redeliver_approved()` exist in the service but are never called. An unhandled `awaiting_confirmation` command may remain non-expired, and `dispatched` may remain non-timed-out. Desktop derives the display expiry from `expires_at`, but the server status remains the source of truth.
-7. `FakeDispatcher`: a `dispatched` status is reached without real delivery; `acknowledged` appears only when a gateway calls `/ack`. Demo and production modes must state this explicitly (“waiting for device ACK”).
+7. MQTT publication confirms broker delivery, not device execution. A `dispatched` status means the broker accepted the message; `acknowledged` appears only when a gateway calls `/ack`. Demo and production modes must state this explicitly (“waiting for device ACK”).
 8. `GET /commands/{command_id}` accepts the client `command_id`, and so do `confirm/reject/ack`; `CommandDto.id` (the internal PK) is never used in these requests.
 9. Idempotency: resubmitting the same `command_id` with the same slug/action/parameters/source returns the existing command rather than a duplicate. This is safe for timeout retries.
 10. CORS is not configured on the backend. This is not critical for a Windows client but would be needed for a web build.

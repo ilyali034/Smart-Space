@@ -13,3 +13,4 @@ torch
 transformers
 accelerate
 PySide6
+aiomqtt>=2.3,<3
