@@ -3,6 +3,7 @@ from collections.abc import Awaitable, Callable
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from backend_engine.modules.commands.entity import InvalidStatusTransition
 from backend_engine.modules.commands.exceptions import (
     CommandConflict,
     CommandNotFound,
@@ -24,6 +25,7 @@ _STATUS: dict[type[Exception], int] = {
     CommandConflict: 409,
     CommandNotFound: 404,
     HumanConfirmationRequired: 403,
+    InvalidStatusTransition: 409,
 }
 
 
