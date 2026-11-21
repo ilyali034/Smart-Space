@@ -13,7 +13,7 @@ class SubmitCommandDto(BaseModel):
     command_id: UUID
     action: str
     parameters: dict[str, Any] = Field(default_factory=dict)
-    source: str = "api"
+    source: CommandSource = CommandSource.API
 
 
 class AckCommandDto(BaseModel):

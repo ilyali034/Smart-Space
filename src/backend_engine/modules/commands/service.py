@@ -98,6 +98,10 @@ class CommandService:
 
         if status == CommandStatus.APPROVED:
             await self._dispatch(entity)
+        async with self._uow() as uow:
+            stored = await uow.commands.get_by_command_id(dto.command_id)
+            if stored is not None:
+                return CommandDto.model_validate(stored)
         return CommandDto.model_validate(entity)
 
     async def _dispatch(self, command: CommandEntity) -> None:
