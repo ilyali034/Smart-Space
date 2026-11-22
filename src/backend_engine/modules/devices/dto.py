@@ -39,6 +39,25 @@ class CreateDeviceDto(BaseModel):
     capabilities: list[str] = Field(default_factory=list, max_length=32)
 
 
+class ReportAvailabilityDto(BaseModel):
+    """Gateway -> backend: the device went online/offline."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    availability: Availability
+    seen_at: datetime | None = None
+
+
+class ReportStateDto(BaseModel):
+    """Gateway -> backend: partial state, merged into the stored state.
+    Receiving state implies the device is online."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    state: dict[str, object] = Field(min_length=1, max_length=64)
+    seen_at: datetime | None = None
+
+
 class DeviceDto(BaseModel):
     """Module boundary. ORM entities never leave the devices module."""
 

@@ -93,3 +93,49 @@ async def test_device_crud_flow(
     assert (await client.delete(f"/api/v1/devices/{dev['id']}", headers=viewer)).status_code == 403
     assert (await client.delete(f"/api/v1/devices/{dev['id']}", headers=admin)).status_code == 204
     assert (await client.get(f"/api/v1/devices/{dev['id']}", headers=admin)).status_code == 404
+
+
+async def test_gateway_reports_availability_and_state(
+    client: httpx.AsyncClient, db: async_sessionmaker[AsyncSession]
+) -> None:
+    admin = auth(await _token(db, Role.ADMIN))
+    gw = auth(await _token(db, Role.GATEWAY))
+    await client.post("/api/v1/devices", json=BODY, headers=admin)
+    url = "/api/v1/devices/kitchen_light"
+
+    assert (await client.put(f"{url}/availability", json={"availability": "online"}, headers=gw)).status_code == 204
+    dev = (await client.get("/api/v1/devices", headers=admin)).json()[0]
+    assert dev["availability"] == "online"
+
+    assert (await client.put(f"{url}/availability", json={"availability": "offline"}, headers=gw)).status_code == 204
+    assert (await client.get("/api/v1/devices", headers=admin)).json()[0]["availability"] == "offline"
+
+    # state is merged, not replaced; receiving state implies online
+    assert (await client.put(f"{url}/state", json={"state": {"power": True}}, headers=gw)).status_code == 204
+    assert (await client.put(f"{url}/state", json={"state": {"brightness": 40}}, headers=gw)).status_code == 204
+    dev = (await client.get("/api/v1/devices", headers=admin)).json()[0]
+    assert dev["state"] == {"power": True, "brightness": 40}
+    assert dev["availability"] == "online" and dev["last_seen_at"] is not None
+
+
+async def test_report_endpoints_are_gateway_only_and_validated(
+    client: httpx.AsyncClient, db: async_sessionmaker[AsyncSession]
+) -> None:
+    admin = auth(await _token(db, Role.ADMIN))
+    gw = auth(await _token(db, Role.GATEWAY))
+    await client.post("/api/v1/devices", json=BODY, headers=admin)
+    url = "/api/v1/devices/kitchen_light"
+    online = {"availability": "online"}
+
+    for role in (Role.VIEWER, Role.USER):  # users must not be able to fake device state
+        h = auth(await _token(db, role))
+        assert (await client.put(f"{url}/availability", json=online, headers=h)).status_code == 403
+        assert (await client.put(f"{url}/state", json={"state": {"a": 1}}, headers=h)).status_code == 403
+    assert (await client.put(f"{url}/availability", json=online)).status_code == 401
+
+    assert (await client.put("/api/v1/devices/nope_1/state", json={"state": {"a": 1}}, headers=gw)).status_code == 404
+    assert (await client.put(f"{url}/availability", json={"availability": "bogus"}, headers=gw)).status_code == 422
+    assert (await client.put(f"{url}/state", json={"state": {}}, headers=gw)).status_code == 422
+    assert (await client.put(f"{url}/state", json={"state": {"a": 1}, "x": 1}, headers=gw)).status_code == 422
+    too_many = {f"k{i}": i for i in range(65)}
+    assert (await client.put(f"{url}/state", json={"state": too_many}, headers=gw)).status_code == 422

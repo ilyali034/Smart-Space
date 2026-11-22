@@ -32,3 +32,10 @@ gateway can subscribe only to its assigned device topic. Enable `MQTT_TLS=true`
 and use credentials outside local development. The backend currently opens a
 broker connection for each approved command; it does not run an MQTT subscriber
 or implement the device gateway.
+
+
+## Реализация (device_gateway)
+
+Gateway из этого документа реализован в `device_gateway/` как отдельный процесс (MQTT → HTTP) и использует
+эндпоинты `PUT /devices/{slug}/availability`, `PUT /devices/{slug}/state`, `POST /commands/{id}/ack`.
+Запуск и тесты: `docs/simulator.md`.

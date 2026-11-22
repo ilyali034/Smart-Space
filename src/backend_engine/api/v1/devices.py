@@ -2,7 +2,12 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request, Response
 
-from backend_engine.modules.devices.dto import CreateDeviceDto, DeviceDto
+from backend_engine.modules.devices.dto import (
+    CreateDeviceDto,
+    DeviceDto,
+    ReportAvailabilityDto,
+    ReportStateDto,
+)
 from backend_engine.modules.devices.service import DeviceService
 from backend_engine.shared.auth.deps import get_principal
 from backend_engine.shared.auth.principal import Principal
@@ -56,3 +61,29 @@ async def delete_device(
 ) -> Response:
     await service.delete(actor, device_id)
     return Response(status_code=204)
+
+
+# ---- gateway-facing (role: gateway, permission device:report) ----
+
+
+@router.put("/{slug}/availability", status_code=204)
+async def report_availability(
+    slug: str,
+    dto: ReportAvailabilityDto,
+    actor: Principal = Depends(get_principal),
+    service: DeviceService = Depends(get_device_service),
+) -> Response:
+    await service.set_availability(actor, slug, dto.availability, seen_at=dto.seen_at)
+    return Response(status_code=204)
+
+
+@router.put("/{slug}/state", status_code=204)
+async def report_state(
+    slug: str,
+    dto: ReportStateDto,
+    actor: Principal = Depends(get_principal),
+    service: DeviceService = Depends(get_device_service),
+) -> Response:
+    await service.report_state(actor, slug, dto.state, seen_at=dto.seen_at)
+    return Response(status_code=204)
+
