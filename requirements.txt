@@ -19,3 +19,4 @@ sounddevice
 pyttsx3
 vosk
 ollama
+mcp
